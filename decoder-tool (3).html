@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sack Results Decoder - Instructor Tool</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Same data as sack module
+        const CHARACTERS = [
+          { id: 1, name: 'Boniface of Montferrat' },
+          { id: 2, name: 'Enrico Dandolo' },
+          { id: 3, name: 'Baldwin of Flanders' },
+          { id: 4, name: 'Bishop Nivelons of Soissons' },
+          { id: 5, name: 'Robert of Clari' },
+          { id: 6, name: 'Louis of Blois' },
+          { id: 7, name: 'Angelo Falier' },
+          { id: 8, name: 'John Faicete of Acre' },
+          { id: 9, name: 'Hugh of Saint-Pol' },
+          { id: 10, name: 'Anna/Agnes of France' },
+          { id: 11, name: 'Oberto II of Biandrate' },
+          { id: 12, name: 'Martin of Parisis' },
+          { id: 13, name: 'Pantaleone Barbo' },
+          { id: 14, name: 'Theodore Branas' },
+          { id: 15, name: 'Geoffrey of Villehardouin' },
+          { id: 16, name: 'Berthold of Katzenellenbogen' },
+          { id: 17, name: 'Conrad of Halberstadt' },
+          { id: 18, name: 'Marino Zeno' },
+          { id: 19, name: 'Brother Barozzi' },
+          { id: 20, name: 'Henry of Flanders' },
+          { id: 21, name: 'Peter of Luciendo' },
+          { id: 22, name: 'Pietro Steno' },
+          { id: 23, name: 'Renier of Travele' },
+          { id: 24, name: 'Conon of Bethune' },
+          { id: 25, name: 'Raimbaut of Vaquiras' },
+          { id: 26, name: 'Garnier of Troyes' },
+          { id: 27, name: 'Marco Sanudo' },
+          { id: 28, name: 'Othon of La Roche' },
+          { id: 29, name: 'Peter of Amiens' },
+          { id: 30, name: 'William of Arles' },
+          { id: 31, name: 'Andrew Valero' },
+          { id: 32, name: 'Amedee Pofey' },
+          { id: 33, name: 'James of Avesnes' },
+          { id: 34, name: 'Marino Ballaresso' },
+          { id: 35, name: 'Peter of Bethlehem' },
+          { id: 36, name: 'Piere Vidal' },
+          { id: 37, name: 'Milo of Brebant' },
+          { id: 38, name: 'Raveno della Carceri' },
+          { id: 39, name: 'Andrea Balduino' },
+          { id: 40, name: 'Peter of Bracieux' },
+          { id: 41, name: 'Hugh of Saint-Ghislain' },
+          { id: 42, name: 'Andre of Ureboise' },
+          { id: 43, name: 'Guy of Pallavicini' },
+          { id: 44, name: 'Matteo Steno' },
+          { id: 45, name: 'Baldwin of Beauvoir' },
+          { id: 46, name: 'Walon of Dampierre' },
+          { id: 47, name: 'King Lalibela of Ethiopia' },
+          { id: 48, name: 'Walframe of Gemona' },
+          { id: 49, name: 'Eustace of Flanders' },
+          { id: 50, name: 'Warin of Douai' },
+          { id: 51, name: 'Henry of Ulmen' },
+          { id: 52, name: 'Domenico of Constantinople' }
+        ];
+
+        const SCENARIOS = {
+          "P1": {
+            region: "Petrion",
+            position: 1,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 10, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 3, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 15, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 20, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 12, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 8, fama: 2, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 18, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Take abbot's icon", marks: 5, fama: 2, nefas: 1 },
+                  { letter: "B", text: "Take tiger pelt rug", marks: 15, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Take abbot's staff", marks: 8, fama: 1, nefas: 0 },
+                  { letter: "D", text: "Take personal crucifix", marks: 10, fama: 3, nefas: 2 }
+                ]
+              }
+            ]
+          },
+          "P2": {
+            region: "Petrion",
+            position: 2,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 10, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 3, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 15, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 20, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 12, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 8, fama: 2, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 18, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Steal decorations", marks: 12, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Swim in underground lake", marks: 0, fama: -1, nefas: 0 },
+                  { letter: "C", text: "Charge Greeks for water", marks: 20, fama: -2, nefas: 2 },
+                  { letter: "D", text: "Search for hidden passages", marks: 25, fama: 1, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "P3": {
+            region: "Petrion",
+            position: 3,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 10, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 3, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 15, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 20, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 12, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 8, fama: 2, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 18, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Pray at Constantine's tomb", marks: 0, fama: 2, nefas: -1 },
+                  { letter: "B", text: "Take Constantine's relics", marks: 15, fama: 5, nefas: 3 },
+                  { letter: "C", text: "Loot Constantine's personal effects", marks: 30, fama: 0, nefas: 2 },
+                  { letter: "D", text: "Sell tomb location to others", marks: 10, fama: -2, nefas: 1 }
+                ]
+              }
+            ]
+          },
+          "P4": {
+            region: "Petrion",
+            position: 4,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 50, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 2, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 150, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 50, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Threaten to burn hospital unless Greeks pay", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Charge protection fee to Greeks", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "C", text: "Take over monastery as patron", marks: 0, fama: 2, nefas: -2 },
+                  { letter: "D", text: "Take valuable objects from monastery", marks: 150, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "P5": {
+            region: "Petrion",
+            position: 5,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 50, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 2, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 150, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 50, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Pray for Anna Comnena's inspiration", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take Anna Comnena's personal effects", marks: 200, fama: 0, nefas: 1 },
+                  { letter: "C", text: "Protect tomb from other looters", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "D", text: "Collect relics from princess remains", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "P6": {
+            region: "Petrion",
+            position: 6,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Break wine-shop door, kill owner, take wine", marks: 50, fama: -2, nefas: 2 },
+                  { letter: "B", text: "Distribute food to Greeks", marks: 0, fama: 2, nefas: -1 },
+                  { letter: "C", text: "Take spices to resell", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Enslave northern importers", marks: 150, fama: -1, nefas: 3 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Operate shops for profit", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Take icons from shops", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "C", text: "Start bonfire", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "D", text: "Search for strongboxes", marks: 50, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Shout at peasant attacking monk", marks: 100, fama: 1, nefas: -1 },
+                  { letter: "B", text: "Attack peasant to save monk", marks: 200, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Let peasant kill the Greek monk", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Help peasant, then attack peasant", marks: 100, fama: 0, nefas: 1 }
+                ]
+              }
+            ]
+          },
+          "B1": {
+            region: "Blachernae",
+            position: 1,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Kill usurper's family", marks: 500, fama: 0, nefas: 3 },
+                  { letter: "B", text: "Take them as hostages", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Accept bribe for their escape", marks: 300, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Let them go free", marks: 150, fama: 1, nefas: -1 }
+                ]
+              }
+            ]
+          },
+          "B2": {
+            region: "Blachernae",
+            position: 2,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Leave icon, take other objects", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Break icon into pieces", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Carefully take icon", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Pray to protect icon", marks: 0, fama: 1, nefas: -1 }
+                ]
+              }
+            ]
+          },
+          "B3": {
+            region: "Blachernae",
+            position: 3,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Find Greek to read papers", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Burn papers and break chest", marks: 250, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Carry chest away", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Burn papers, find wine", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "B4": {
+            region: "Blachernae",
+            position: 4,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Free nobles for treasure locations", marks: 450, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Find Alexius IV's cell and loot", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Free women and children", marks: 0, fama: 2, nefas: -2 },
+                  { letter: "D", text: "Search for keys to control prison", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "B5": {
+            region: "Blachernae",
+            position: 5,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Collect tolls from refugees", marks: 350, fama: 0, nefas: 2 },
+                  { letter: "B", text: "Claim gatehouse as property", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Let refugees pass for free", marks: 50, fama: 1, nefas: -2 },
+                  { letter: "D", text: "Loot gatehouse for arms/cash", marks: 50, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "B6": {
+            region: "Blachernae",
+            position: 6,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Varangian and take his gear", marks: 50, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Drive off Varangian, escort monk", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Attack Varangian, demand tribute from both", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill both, take crucifix and gear", marks: 150, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Invite crusaders to feast", marks: 0, fama: 3, nefas: 0 },
+                  { letter: "B", text: "Protect palace servants", marks: 25, fama: 1, nefas: -1 },
+                  { letter: "C", text: "Feed refugees", marks: 0, fama: 2, nefas: -3 },
+                  { letter: "D", text: "Eat feast, steal cutlery", marks: 250, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "G1": {
+            region: "Great Palace",
+            position: 1,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard post, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Kill Empress Margaret and sons", marks: 150, fama: 0, nefas: 3 },
+                  { letter: "B", text: "Keep as hostages, marry empress", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Accept bribe, let them go", marks: 400, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Promise protection", marks: 0, fama: 0, nefas: -2 }
+                ]
+              }
+            ]
+          },
+          "G2": {
+            region: "Great Palace",
+            position: 2,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard hut, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Guard chapel and relics all night", marks: 0, fama: 3, nefas: -2 },
+                  { letter: "B", text: "Take True Cross and Crown of Thorns", marks: 0, fama: 0, nefas: 4 },
+                  { letter: "C", text: "Steal gold/silver reliquaries", marks: 500, fama: 0, nefas: 2 },
+                  { letter: "D", text: "Take only smaller reliquaries", marks: 150, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "G3": {
+            region: "Great Palace",
+            position: 3,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard hut, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Smash throne, steal regalia", marks: 500, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Sit on throne, pretend to be emperor", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Break throne into pieces", marks: 400, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Take regalia for safekeeping", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "G4": {
+            region: "Great Palace",
+            position: 4,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard hut, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Smash statues to bits", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Pry stones from statues", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Stage your own race", marks: 100, fama: 1, nefas: 0 },
+                  { letter: "D", text: "Try to remove great column", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "G5": {
+            region: "Great Palace",
+            position: 5,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard hut, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Take chalices and small goods", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Smash altar for gems/metals", marks: 750, fama: 0, nefas: 3 },
+                  { letter: "C", text: "Remove wall decorations", marks: 500, fama: 0, nefas: 2 },
+                  { letter: "D", text: "Pray, take nothing", marks: 0, fama: 1, nefas: -1 }
+                ]
+              }
+            ]
+          },
+          "G6": {
+            region: "Great Palace",
+            position: 6,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Set fire to guard hut, loot during panic", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "B", text: "Leave them alone", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Capture hut, demand ransom", marks: 150, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Kill Varangians, enslave watchmen", marks: 100, fama: 0, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Escort boy home with valuables", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Take loot and enslave boy", marks: 150, fama: -1, nefas: 2 },
+                  { letter: "C", text: "Kill boy, take loot, set fire", marks: 0, fama: -3, nefas: 3 },
+                  { letter: "D", text: "Use boy as hostage/guide", marks: 150, fama: -1, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Demand prostitute leave holy place", marks: 0, fama: 1, nefas: -1 },
+                  { letter: "B", text: "Salute her and tip well", marks: 50, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Ignore her, search for valuables", marks: 50, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Proposition the prostitute", marks: -50, fama: 0, nefas: 3 }
+                ]
+              }
+            ]
+          },
+          "M1": {
+            region: "Merchant Quarter",
+            position: 1,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Burn mosque with Muslims inside", marks: 200, fama: 1, nefas: 3 },
+                  { letter: "B", text: "Guide Muslims out, loot mosque", marks: 250, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Rob Muslims and loot mosque", marks: 400, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Protect mosque for information", marks: 0, fama: 2, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "M2": {
+            region: "Merchant Quarter",
+            position: 2,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Give Venetian storehouse to Doge", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Loot storehouse for gold", marks: 250, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Loot storehouse for goods", marks: 300, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Return storehouse to Venetians", marks: 50, fama: 3, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "M3": {
+            region: "Merchant Quarter",
+            position: 3,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Give Genoese storehouse to Doge", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Loot storehouse for gold", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Loot storehouse for goods", marks: 200, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Return storehouse to Genoese", marks: 50, fama: 1, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "M4": {
+            region: "Merchant Quarter",
+            position: 4,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Give Pisan storehouse to Doge", marks: 50, fama: 2, nefas: 0 },
+                  { letter: "B", text: "Loot storehouse for gold", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Loot storehouse for goods", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Return storehouse to Pisans", marks: 50, fama: 1, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "M5": {
+            region: "Merchant Quarter",
+            position: 5,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Free Amalfitan, follow to treasure (crusade)", marks: 0, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave Amalfitan in cell", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Question Amalfitan about city", marks: 250, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Free Amalfitan, follow to treasure", marks: 0, fama: -1, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "M6": {
+            region: "Merchant Quarter",
+            position: 6,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Kill Catalan merchant, burn shop", marks: 100, fama: -1, nefas: 1 },
+                  { letter: "B", text: "Leave shop alone (Christian owner)", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Take valuables, advise absolution", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Kill owner, ransom wife", marks: 150, fama: -1, nefas: 2 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Protect priest from looters", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Kill priest, take church valuables", marks: 200, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Drive priest out, take vestments", marks: 50, fama: -2, nefas: 1 },
+                  { letter: "D", text: "Take poor-box and vestments", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Take large crate", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Take cabinet", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Take round box", marks: 300, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Take gray jar", marks: 300, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "R1": {
+            region: "Residential Quarter",
+            position: 1,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Claim house, search for valuables", marks: 400, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Burn house to ground", marks: 0, fama: -2, nefas: 2 },
+                  { letter: "C", text: "Take family as hostages", marks: 200, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Turn house into inn, charge refugees", marks: 300, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "R2": {
+            region: "Residential Quarter",
+            position: 2,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Accept bribe to leave house alone", marks: 200, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Protect house, become patron", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Break door, loot house", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Break door, take man hostage", marks: 0, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "R3": {
+            region: "Residential Quarter",
+            position: 3,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Take purple porphyry statue", marks: 250, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Loot shops around forum", marks: 150, fama: 0, nefas: 0 },
+                  { letter: "C", text: "Take bronze Theodosius statue", marks: 150, fama: 0, nefas: 2 },
+                  { letter: "D", text: "Set up stalls, sell goods", marks: 350, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "R4": {
+            region: "Residential Quarter",
+            position: 4,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Claim house as property", marks: 0, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Burn house to ground", marks: 0, fama: -2, nefas: 2 },
+                  { letter: "C", text: "Search for owners, take hostage", marks: 100, fama: 0, nefas: 1 },
+                  { letter: "D", text: "Turn house into inn, charge refugees", marks: 100, fama: 0, nefas: 0 }
+                ]
+              }
+            ]
+          },
+          "R5": {
+            region: "Residential Quarter",
+            position: 5,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Abduct children, sell in camp", marks: 150, fama: 0, nefas: 4 },
+                  { letter: "B", text: "Burn slave market", marks: 0, fama: -2, nefas: 2 },
+                  { letter: "C", text: "Search master's house", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "D", text: "Free the slaves", marks: 0, fama: 0, nefas: -1 }
+                ]
+              }
+            ]
+          },
+          "R6": {
+            region: "Residential Quarter",
+            position: 6,
+            questions: [
+              {
+                choices: [
+                  { letter: "A", text: "Drive beggars off, search mansion", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Wash feet of beggars", marks: 0, fama: 2, nefas: 0 },
+                  { letter: "C", text: "Demand beggars give you their goods", marks: 150, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Kill beggars, search mansion", marks: 100, fama: 0, nefas: 1 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Mediate dispute, take share", marks: 50, fama: 1, nefas: 0 },
+                  { letter: "B", text: "Lock them in, set fire to shop", marks: 0, fama: -3, nefas: 2 },
+                  { letter: "C", text: "Kill both, take all coins", marks: 50, fama: -1, nefas: 1 },
+                  { letter: "D", text: "Wait for fight to end, search shop", marks: 100, fama: 0, nefas: 0 }
+                ]
+              },
+              {
+                choices: [
+                  { letter: "A", text: "Loot chalices", marks: 100, fama: 0, nefas: 0 },
+                  { letter: "B", text: "Take St. Simon relics", marks: 0, fama: 2, nefas: 1 },
+                  { letter: "C", text: "Take chalices and relics", marks: 100, fama: 2, nefas: 1 },
+                  { letter: "D", text: "Pray, take nothing", marks: 0, fama: 1, nefas: -1 }
+                ]
+              }
+            ]
+          }
+        };
+
+        // QUALITY MAPPING (per Instructor's Manual)
+        // Q1: A=Violence, B=Piety, C=Plunder, D=Sacrilege
+        // Q2: A=Piety, B=Sacrilege, C=Violence, D=Plunder
+        const QUALITY_MAP = {
+            Q1: { A: 'Violence', B: 'Piety', C: 'Plunder', D: 'Sacrilege' },
+            Q2: { A: 'Piety', B: 'Sacrilege', C: 'Violence', D: 'Plunder' }
+        };
+
+        // Narrative suggestions based on percentage ranges
+        const NARRATIVE_TEMPLATES = {
+            Violence: {
+                'low': "the city was remarkably calm, and there were few reports of violence across the city, far fewer than most of the Greek inhabitants had feared",
+                'moderate': "violence was present but restrained in most quarters, with isolated incidents of brutality",
+                'high': "violence swept through many districts, with reports of bloodshed becoming commonplace",
+                'legendary': "the sack was marked by extraordinary violence, with tales of brutality spreading throughout the city"
+            },
+            Piety: {
+                'low': "few crusaders showed mercy or restraint toward the Greek population",
+                'moderate': "in but a few places, Crusaders bore considerable hardships to shelter Greek Christians and their goods",
+                'high': "many crusaders demonstrated remarkable piety, actively protecting Greeks and holy sites",
+                'legendary': "the crusade was characterized by extraordinary acts of mercy and protection toward the Greeks"
+            },
+            Sacrilege: {
+                'low': "even the holy places and divine law were kept with remarkable restraint",
+                'moderate': "some holy sites suffered desecration, though most churches remained intact",
+                'high': "many holy places were violated, with sacred objects stolen or destroyed",
+                'legendary': "the sack was marked by appalling sacrilege, with holy sites systematically defiled"
+            },
+            Plunder: {
+                'low': "surprisingly little treasure was taken from the city",
+                'moderate': "considerable wealth was extracted, though many treasures remained",
+                'high': "the only real victim of the sack was the gold and silver of the city, which was carried off with remarkable vigor",
+                'legendary': "the crusaders stripped Constantinople of virtually all its portable wealth with ruthless efficiency"
+            }
+        };
+
+        // Get narrative intensity based on percentage
+        const getNarrativeIntensity = (percentage) => {
+            if (percentage < 15) return 'low';
+            if (percentage < 45) return 'moderate';
+            if (percentage < 75) return 'high';
+            return 'legendary';
+        };
+
+        // Q3 DRAMATIC SCENARIOS DATABASE
+        // Tags scenarios by type for instructor narrative highlights
+        const DRAMATIC_Q3 = {
+            // SCANDALOUS - Actions that cause social/religious scandal
+            scandalous: [
+                { code: 'G6', choice: 'D', description: 'Propositioned prostitute at Hagia Sophia', severity: 'extreme' },
+                { code: 'G6', choice: 'B', description: 'Saluted and tipped prostitute enthroned as patriarch', severity: 'high' },
+                { code: 'P2', choice: 'B', description: 'Swam in sacred underground cistern', severity: 'moderate' }
+            ],
+            
+            // BRUTAL - Extreme violence against innocents
+            brutal: [
+                { code: 'B1', choice: 'A', description: 'Executed usurper\'s wife and children', severity: 'extreme' },
+                { code: 'R5', choice: 'A', description: 'Abducted children to sell as slaves', severity: 'extreme' },
+                { code: 'P6', choice: 'D', description: 'Helped peasant kill monk, then betrayed peasant', severity: 'high' }
+            ],
+            
+            // SACRILEGIOUS - Major violations of holy sites/objects
+            sacrilegious: [
+                { code: 'G2', choice: 'B', description: 'Seized Crown of Thorns and True Cross relics', severity: 'extreme' },
+                { code: 'G5', choice: 'B', description: 'Smashed Hagia Sophia altar for gems', severity: 'extreme' },
+                { code: 'P3', choice: 'B', description: 'Plundered Constantine the Great\'s tomb for relics', severity: 'high' },
+                { code: 'G2', choice: 'C', description: 'Stole gold/silver reliquaries from imperial chapel', severity: 'high' }
+            ],
+            
+            // VALUABLE - Political leverage, extra votes, extraordinary wealth
+            valuable: [
+                { code: 'P3', choice: 'B', description: 'Constantine\'s relics (extra votes)', value: 'political_power', notes: 'Grants +5 fama, likely extra committee votes' },
+                { code: 'G1', choice: 'B', description: 'Empress Margaret and sons as hostages', value: 'political_leverage', notes: 'Former empress, political bargaining chip' },
+                { code: 'B1', choice: 'B', description: 'Usurper\'s family as hostages', value: 'political_leverage', notes: 'Can influence Greek factions' },
+                { code: 'B4', choice: 'A', description: 'Freed nobles reveal hidden treasures (450 marks)', value: 'wealth', notes: 'Extraordinary sum' },
+                { code: 'G3', choice: 'A', description: 'Imperial throne and regalia (500 marks)', value: 'wealth', notes: 'Symbolic imperial authority' },
+                { code: 'G5', choice: 'B', description: 'Hagia Sophia altar gems (750 marks)', value: 'wealth', notes: 'Massive wealth despite sacrilege' },
+                { code: 'B5', choice: 'A', description: 'Theodosian Walls gatehouse (tolls: 350 marks)', value: 'property', notes: 'Strategic position, ongoing income' }
+            ],
+            
+            // HEROIC - Extraordinary mercy/piety
+            heroic: [
+                { code: 'G2', choice: 'A', description: 'Guarded imperial chapel and relics all night', virtue: 'piety' },
+                { code: 'B6', choice: 'C', description: 'Fed refugees with imperial feast', virtue: 'mercy' },
+                { code: 'B6', choice: 'A', description: 'Invited fellow crusaders to feast together', virtue: 'brotherhood' },
+                { code: 'R5', choice: 'D', description: 'Freed slaves from their chains', virtue: 'justice' },
+                { code: 'P4', choice: 'C', description: 'Became patron of Pantocrator Hospital', virtue: 'charity' }
+            ]
+        };
+
+        // Get dramatic category for a Q3 choice
+        const getDramaticCategory = (scenarioCode, choice) => {
+            const categories = [];
+            Object.keys(DRAMATIC_Q3).forEach(category => {
+                const found = DRAMATIC_Q3[category].find(d => d.code === scenarioCode && d.choice === choice);
+                if (found) {
+                    categories.push({ category, ...found });
+                }
+            });
+            return categories;
+        };
+
+        const DecoderTool = () => {
+            const [codesInput, setCodesInput] = useState('');
+            const [results, setResults] = useState(null);
+            const [errorMessages, setErrorMessages] = useState([]);
+
+            const decodeResults = () => {
+                const lines = codesInput.trim().split('\n').filter(line => line.trim());
+                const decodedResults = [];
+                const errors = [];
+
+                lines.forEach((line, idx) => {
+                    const code = line.trim().toUpperCase();
+                    
+                    // Parse code: [01][P1][ABC]-[140]
+                    // Characters 0-1: Character ID
+                    // Characters 2-3: Scenario code (region letter + position)
+                    // Characters 4-6: Choices
+                    // After hyphen: Turned-in amount (optional for backward compatibility)
+                    
+                    // Split on hyphen to separate base code from silver data
+                    const parts = code.split('-');
+                    const baseCode = parts[0];
+                    const turnedInAmount = parts[1] ? parseInt(parts[1]) : null;
+                    
+                    if (baseCode.length !== 7) {
+                        errors.push(`Line ${idx + 1}: Invalid code length "${baseCode}" (should be 7 characters before hyphen)`);
+                        return;
+                    }
+
+                    const charId = parseInt(baseCode.substring(0, 2));
+                    const scenarioCode = baseCode.substring(2, 4);
+                    const choices = baseCode.substring(4, 7).split('');
+
+                    // Validate
+                    const character = CHARACTERS.find(c => c.id === charId);
+                    const scenario = SCENARIOS[scenarioCode];
+
+                    if (!character) {
+                        errors.push(`Line ${idx + 1}: Invalid character ID ${charId}`);
+                        return;
+                    }
+
+                    if (!scenario) {
+                        errors.push(`Line ${idx + 1}: Unknown scenario code "${scenarioCode}"`);
+                        return;
+                    }
+
+                    if (choices.length !== 3) {
+                        errors.push(`Line ${idx + 1}: Should have exactly 3 choices`);
+                        return;
+                    }
+
+                    // Calculate results
+                    let marks = 0;
+                    let fama = 0;
+                    let nefas = 0;
+                    const choiceDetails = [];
+
+                    choices.forEach((letter, qIdx) => {
+                        const question = scenario.questions[qIdx];
+                        const choice = question.choices.find(c => c.letter === letter);
+
+                        if (!choice) {
+                            errors.push(`Line ${idx + 1}: Invalid choice "${letter}" for question ${qIdx + 1}`);
+                            return;
+                        }
+
+                        marks += choice.marks;
+                        fama += choice.fama;
+                        nefas += choice.nefas;
+                        choiceDetails.push({
+                            question: qIdx + 1,
+                            choice: letter,
+                            text: choice.text,
+                            marks: choice.marks,
+                            fama: choice.fama,
+                            nefas: choice.nefas
+                        });
+                    });
+
+                    decodedResults.push({
+                        code,
+                        character,
+                        scenario: { code: scenarioCode, ...scenario },
+                        choices,
+                        choiceDetails,
+                        totals: { marks, fama, nefas },
+                        silver: {
+                            collected: marks,
+                            turnedIn: turnedInAmount,
+                            kept: turnedInAmount !== null ? (marks - turnedInAmount) : null,
+                            percentTurnedIn: turnedInAmount !== null && marks > 0 ? ((turnedInAmount / marks) * 100) : null,
+                            hasData: turnedInAmount !== null
+                        }
+                    });
+                });
+
+                setErrorMessages(errors);
+                setResults(decodedResults);
+            };
+
+            const calculateClassTotals = () => {
+                if (!results || results.length === 0) return null;
+
+                const totals = results.reduce((acc, r) => {
+                    acc.marks += r.totals.marks;
+                    acc.fama += r.totals.fama;
+                    acc.nefas += r.totals.nefas;
+                    return acc;
+                }, { marks: 0, fama: 0, nefas: 0 });
+
+                const avg = {
+                    marks: (totals.marks / results.length).toFixed(1),
+                    fama: (totals.fama / results.length).toFixed(1),
+                    nefas: (totals.nefas / results.length).toFixed(1)
+                };
+
+                return { totals, avg, count: results.length };
+            };
+
+            const calculateQualityAnalysis = () => {
+                if (!results || results.length === 0) return null;
+
+                const qualities = {
+                    Violence: 0,
+                    Piety: 0,
+                    Plunder: 0,
+                    Sacrilege: 0
+                };
+
+                // Count Q1 and Q2 choices (Q3 is unique scenarios, not counted)
+                results.forEach(r => {
+                    // Q1 choice (index 0)
+                    const q1Choice = r.choices[0];
+                    if (QUALITY_MAP.Q1[q1Choice]) {
+                        qualities[QUALITY_MAP.Q1[q1Choice]]++;
+                    }
+
+                    // Q2 choice (index 1)
+                    const q2Choice = r.choices[1];
+                    if (QUALITY_MAP.Q2[q2Choice]) {
+                        qualities[QUALITY_MAP.Q2[q2Choice]]++;
+                    }
+                });
+
+                // Calculate total incidents (2 choices per student)
+                const totalIncidents = results.length * 2;
+
+                // Calculate percentages
+                const percentages = {};
+                const narratives = {};
+                Object.keys(qualities).forEach(quality => {
+                    const pct = (qualities[quality] / totalIncidents) * 100;
+                    percentages[quality] = pct;
+                    const intensity = getNarrativeIntensity(pct);
+                    narratives[quality] = NARRATIVE_TEMPLATES[quality][intensity];
+                });
+
+                return {
+                    counts: qualities,
+                    percentages,
+                    narratives,
+                    totalIncidents
+                };
+            };
+
+            const analyzeDramaticHighlights = () => {
+                if (!results || results.length === 0) return null;
+
+                const highlights = {
+                    scandalous: [],
+                    brutal: [],
+                    sacrilegious: [],
+                    valuable: [],
+                    heroic: []
+                };
+
+                results.forEach(result => {
+                    // Q3 is index 2
+                    const q3Choice = result.choices[2];
+                    const scenarioCode = result.scenario.code;
+                    
+                    const categories = getDramaticCategory(scenarioCode, q3Choice);
+                    
+                    categories.forEach(cat => {
+                        highlights[cat.category].push({
+                            character: result.character.name,
+                            characterId: result.character.id,
+                            scenario: scenarioCode,
+                            region: result.scenario.region,
+                            choice: q3Choice,
+                            description: cat.description,
+                            severity: cat.severity,
+                            value: cat.value,
+                            virtue: cat.virtue,
+                            notes: cat.notes,
+                            choiceText: result.choiceDetails[2].text,
+                            scoring: {
+                                marks: result.choiceDetails[2].marks,
+                                fama: result.choiceDetails[2].fama,
+                                nefas: result.choiceDetails[2].nefas
+                            }
+                        });
+                    });
+                });
+
+                return highlights;
+            };
+
+            const analyzeSilverManagement = () => {
+                if (!results || results.length === 0) return null;
+
+                // Check if any codes have silver data
+                const codesWithSilver = results.filter(r => r.silver.hasData);
+                if (codesWithSilver.length === 0) return null;
+
+                const totalCollected = codesWithSilver.reduce((sum, r) => sum + r.silver.collected, 0);
+                const totalTurnedIn = codesWithSilver.reduce((sum, r) => sum + r.silver.turnedIn, 0);
+                const totalKept = codesWithSilver.reduce((sum, r) => sum + r.silver.kept, 0);
+                const avgPercentTurnedIn = codesWithSilver.reduce((sum, r) => sum + r.silver.percentTurnedIn, 0) / codesWithSilver.length;
+
+                // Venice payment calculation (100 marks per crusader)
+                const veniceRequired = codesWithSilver.length * 100;
+                const veniceShortfall = Math.max(0, veniceRequired - totalTurnedIn);
+                const venicePaid = totalTurnedIn >= veniceRequired;
+
+                // Honesty distribution
+                const honestyCategories = {
+                    full: codesWithSilver.filter(r => r.silver.percentTurnedIn >= 95).length,
+                    high: codesWithSilver.filter(r => r.silver.percentTurnedIn >= 70 && r.silver.percentTurnedIn < 95).length,
+                    moderate: codesWithSilver.filter(r => r.silver.percentTurnedIn >= 40 && r.silver.percentTurnedIn < 70).length,
+                    low: codesWithSilver.filter(r => r.silver.percentTurnedIn >= 15 && r.silver.percentTurnedIn < 40).length,
+                    minimal: codesWithSilver.filter(r => r.silver.percentTurnedIn < 15).length
+                };
+
+                // Identify extremes
+                const mostHonest = [...codesWithSilver].sort((a, b) => b.silver.percentTurnedIn - a.silver.percentTurnedIn).slice(0, 3);
+                const mostGreedy = [...codesWithSilver].sort((a, b) => a.silver.percentTurnedIn - b.silver.percentTurnedIn).slice(0, 3);
+
+                return {
+                    studentsReporting: codesWithSilver.length,
+                    totalCollected,
+                    totalTurnedIn,
+                    totalKept,
+                    avgPercentTurnedIn,
+                    veniceRequired,
+                    veniceShortfall,
+                    venicePaid,
+                    honestyCategories,
+                    mostHonest,
+                    mostGreedy
+                };
+            };
+
+            const exportToCSV = () => {
+                if (!results || results.length === 0) return;
+
+                const headers = ['Character ID', 'Character Name', 'Scenario', 'Choices', 'Marks', 'Fama', 'Nefas'];
+                const rows = results.map(r => [
+                    r.character.id,
+                    r.character.name,
+                    r.scenario.code,
+                    r.choices.join(''),
+                    r.totals.marks,
+                    r.totals.fama,
+                    r.totals.nefas
+                ]);
+
+                const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sack-results.csv';
+                a.click();
+            };
+
+            const classStats = calculateClassTotals();
+            const qualityAnalysis = calculateQualityAnalysis();
+            const dramaticHighlights = analyzeDramaticHighlights();
+            const silverAnalysis = analyzeSilverManagement();
+
+            return (
+                <div className="min-h-screen bg-gray-50 p-6">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg shadow-lg p-8 mb-8">
+                            <h1 className="text-4xl font-bold mb-2">🎓 Sack Results Decoder</h1>
+                            <p className="text-xl text-blue-100">Instructor Tool - Fourth Crusade Game</p>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800">Instructions</h2>
+                            <ol className="space-y-2 text-gray-700">
+                                <li>1. Collect result codes from students (one per line)</li>
+                                <li>2. Paste all codes into the text area below</li>
+                                <li>3. Click "Decode Results" to generate individual and class summaries</li>
+                                <li>4. Export to CSV for gradebook integration</li>
+                            </ol>
+                            <div className="mt-4 p-4 bg-blue-50 rounded border-l-4 border-blue-500">
+                                <p className="text-sm text-gray-700">
+                                    <strong>Code Format:</strong> Each code is 7 characters: 
+                                    <code className="bg-gray-200 px-2 py-1 rounded ml-2">01P1ABC</code>
+                                    <br />
+                                    <span className="text-xs text-gray-600">
+                                        [Character ID (2 digits)][Scenario Code (2 chars)][Three Choices (3 letters A-D)]
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <h2 className="text-2xl font-bold mb-4 text-gray-800">Enter Student Codes</h2>
+                            <textarea
+                                className="w-full h-48 p-4 border-2 border-gray-300 rounded font-mono text-sm focus:border-blue-500 focus:outline-none"
+                                placeholder="Paste student codes here (one per line)...
+Example:
+01P1ABC
+05P2DAB
+12P3BCD"
+                                value={codesInput}
+                                onChange={(e) => setCodesInput(e.target.value)}
+                            />
+                            <div className="mt-4 flex gap-4">
+                                <button
+                                    onClick={decodeResults}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
+                                >
+                                    🔍 Decode Results
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setCodesInput('');
+                                        setResults(null);
+                                        setErrorMessages([]);
+                                    }}
+                                    className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-8 rounded-lg shadow transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Error Messages */}
+                        {errorMessages.length > 0 && (
+                            <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-6">
+                                <h3 className="text-lg font-bold text-red-800 mb-2">⚠️ Errors Found:</h3>
+                                <ul className="space-y-1">
+                                    {errorMessages.map((msg, idx) => (
+                                        <li key={idx} className="text-red-700 text-sm">{msg}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Quality Analysis & Narration Helper */}
+                        {qualityAnalysis && (
+                            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg shadow-md p-6 mb-6 border-2 border-amber-300">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">🎭 Quality Analysis & Narration Helper</h2>
+                                
+                                <div className="bg-white rounded-lg p-4 mb-4 border border-amber-200">
+                                    <p className="text-sm text-gray-600 mb-3">
+                                        Based on Questions 1 & 2 choices (standard regional questions). 
+                                        Question 3 unique scenarios are not included in quality percentages.
+                                    </p>
+                                    
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                        <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
+                                            <div className="text-xs text-gray-600 mb-1">VIOLENCE</div>
+                                            <div className="text-2xl font-bold text-red-700">
+                                                {qualityAnalysis.percentages.Violence.toFixed(1)}%
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">
+                                                {qualityAnalysis.counts.Violence} / {qualityAnalysis.totalIncidents} incidents
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                            <div className="text-xs text-gray-600 mb-1">PIETY</div>
+                                            <div className="text-2xl font-bold text-blue-700">
+                                                {qualityAnalysis.percentages.Piety.toFixed(1)}%
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">
+                                                {qualityAnalysis.counts.Piety} / {qualityAnalysis.totalIncidents} incidents
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
+                                            <div className="text-xs text-gray-600 mb-1">PLUNDER</div>
+                                            <div className="text-2xl font-bold text-green-700">
+                                                {qualityAnalysis.percentages.Plunder.toFixed(1)}%
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">
+                                                {qualityAnalysis.counts.Plunder} / {qualityAnalysis.totalIncidents} incidents
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-500">
+                                            <div className="text-xs text-gray-600 mb-1">SACRILEGE</div>
+                                            <div className="text-2xl font-bold text-purple-700">
+                                                {qualityAnalysis.percentages.Sacrilege.toFixed(1)}%
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">
+                                                {qualityAnalysis.counts.Sacrilege} / {qualityAnalysis.totalIncidents} incidents
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-amber-100 rounded-lg p-4 border border-amber-300">
+                                    <h3 className="font-bold text-gray-800 mb-3">📖 Suggested Narrative Opening</h3>
+                                    <p className="text-sm text-gray-600 mb-3">
+                                        Use these passages to describe the overall character of the sack to your students:
+                                    </p>
+                                    
+                                    <div className="space-y-3">
+                                        {qualityAnalysis.percentages.Violence >= 15 && (
+                                            <div className="bg-white rounded p-3 border-l-4 border-red-500">
+                                                <div className="text-xs font-bold text-red-700 mb-1">
+                                                    VIOLENCE ({qualityAnalysis.percentages.Violence.toFixed(1)}%)
+                                                </div>
+                                                <div className="text-sm text-gray-700 italic">
+                                                    "{qualityAnalysis.narratives.Violence}"
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {qualityAnalysis.percentages.Piety >= 15 && (
+                                            <div className="bg-white rounded p-3 border-l-4 border-blue-500">
+                                                <div className="text-xs font-bold text-blue-700 mb-1">
+                                                    PIETY ({qualityAnalysis.percentages.Piety.toFixed(1)}%)
+                                                </div>
+                                                <div className="text-sm text-gray-700 italic">
+                                                    "{qualityAnalysis.narratives.Piety}"
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {qualityAnalysis.percentages.Plunder >= 15 && (
+                                            <div className="bg-white rounded p-3 border-l-4 border-green-500">
+                                                <div className="text-xs font-bold text-green-700 mb-1">
+                                                    PLUNDER ({qualityAnalysis.percentages.Plunder.toFixed(1)}%)
+                                                </div>
+                                                <div className="text-sm text-gray-700 italic">
+                                                    "{qualityAnalysis.narratives.Plunder}"
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {qualityAnalysis.percentages.Sacrilege >= 15 && (
+                                            <div className="bg-white rounded p-3 border-l-4 border-purple-500">
+                                                <div className="text-xs font-bold text-purple-700 mb-1">
+                                                    SACRILEGE ({qualityAnalysis.percentages.Sacrilege.toFixed(1)}%)
+                                                </div>
+                                                <div className="text-sm text-gray-700 italic">
+                                                    "{qualityAnalysis.narratives.Sacrilege}"
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Show all qualities if user wants comprehensive view */}
+                                    <details className="mt-4">
+                                        <summary className="cursor-pointer text-sm font-bold text-amber-800 hover:text-amber-900">
+                                            View All Narrative Options (including low percentages)
+                                        </summary>
+                                        <div className="mt-3 space-y-2 pl-4">
+                                            {Object.keys(qualityAnalysis.narratives).map(quality => (
+                                                qualityAnalysis.percentages[quality] < 15 && (
+                                                    <div key={quality} className="text-sm text-gray-600">
+                                                        <span className="font-bold">{quality} ({qualityAnalysis.percentages[quality].toFixed(1)}%):</span>
+                                                        <span className="italic"> "{qualityAnalysis.narratives[quality]}"</span>
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <div className="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-300">
+                                    <h4 className="font-bold text-gray-800 mb-2">💡 Instructor Tips</h4>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• Qualities above 15% should be mentioned in your narrative</li>
+                                        <li>• Qualities above 45% should be emphasized as defining characteristics</li>
+                                        <li>• Qualities above 75% indicate legendary/extreme behavior</li>
+                                        <li>• Combine these passages naturally to create your opening narration</li>
+                                        <li>• Follow with dramatic Q3 scenarios to bring events to life</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Dramatic Q3 Highlights */}
+                        {dramaticHighlights && (
+                            <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg shadow-md p-6 mb-6 border-2 border-rose-300">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">🔥 Dramatic Q3 Highlights</h2>
+                                
+                                <div className="bg-white rounded-lg p-4 mb-4 border border-rose-200">
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        Question 3 unique scenarios contain documented historical events. 
+                                        Highlight these dramatic moments to bring the sack to life!
+                                    </p>
+                                    <p className="text-xs text-gray-500 italic">
+                                        Note: Per IM guidelines, reveal factions but consider keeping individual identities private for added intrigue.
+                                    </p>
+                                </div>
+
+                                {/* Scandalous Actions */}
+                                {dramaticHighlights.scandalous.length > 0 && (
+                                    <div className="bg-pink-50 rounded-lg p-4 mb-4 border-l-4 border-pink-600">
+                                        <h3 className="font-bold text-pink-900 mb-3 flex items-center gap-2">
+                                            <span>😱 SCANDALOUS ACTIONS</span>
+                                            <span className="text-xs bg-pink-200 px-2 py-1 rounded">{dramaticHighlights.scandalous.length}</span>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {dramaticHighlights.scandalous.map((h, idx) => (
+                                                <div key={idx} className="bg-white rounded p-3 border border-pink-200">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="font-semibold text-gray-800">{h.description}</div>
+                                                        {h.severity === 'extreme' && (
+                                                            <span className="text-xs bg-red-600 text-white px-2 py-1 rounded font-bold">EXTREME</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Location: {h.region} ({h.scenario}) • Character: {h.character}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Scoring: {h.scoring.marks} marks, {h.scoring.fama > 0 ? '+' : ''}{h.scoring.fama} fama, {h.scoring.nefas > 0 ? '+' : ''}{h.scoring.nefas} nefas
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Brutal Actions */}
+                                {dramaticHighlights.brutal.length > 0 && (
+                                    <div className="bg-red-50 rounded-lg p-4 mb-4 border-l-4 border-red-600">
+                                        <h3 className="font-bold text-red-900 mb-3 flex items-center gap-2">
+                                            <span>⚔️ BRUTAL VIOLENCE</span>
+                                            <span className="text-xs bg-red-200 px-2 py-1 rounded">{dramaticHighlights.brutal.length}</span>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {dramaticHighlights.brutal.map((h, idx) => (
+                                                <div key={idx} className="bg-white rounded p-3 border border-red-200">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="font-semibold text-gray-800">{h.description}</div>
+                                                        {h.severity === 'extreme' && (
+                                                            <span className="text-xs bg-red-600 text-white px-2 py-1 rounded font-bold">EXTREME</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Location: {h.region} ({h.scenario}) • Character: {h.character}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Scoring: {h.scoring.marks} marks, {h.scoring.fama > 0 ? '+' : ''}{h.scoring.fama} fama, {h.scoring.nefas > 0 ? '+' : ''}{h.scoring.nefas} nefas
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Sacrilegious Actions */}
+                                {dramaticHighlights.sacrilegious.length > 0 && (
+                                    <div className="bg-purple-50 rounded-lg p-4 mb-4 border-l-4 border-purple-600">
+                                        <h3 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
+                                            <span>⛪ SACRILEGIOUS ACTS</span>
+                                            <span className="text-xs bg-purple-200 px-2 py-1 rounded">{dramaticHighlights.sacrilegious.length}</span>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {dramaticHighlights.sacrilegious.map((h, idx) => (
+                                                <div key={idx} className="bg-white rounded p-3 border border-purple-200">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="font-semibold text-gray-800">{h.description}</div>
+                                                        {h.severity === 'extreme' && (
+                                                            <span className="text-xs bg-red-600 text-white px-2 py-1 rounded font-bold">EXTREME</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Location: {h.region} ({h.scenario}) • Character: {h.character}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Scoring: {h.scoring.marks} marks, {h.scoring.fama > 0 ? '+' : ''}{h.scoring.fama} fama, {h.scoring.nefas > 0 ? '+' : ''}{h.scoring.nefas} nefas
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Valuable Acquisitions */}
+                                {dramaticHighlights.valuable.length > 0 && (
+                                    <div className="bg-amber-50 rounded-lg p-4 mb-4 border-l-4 border-amber-600">
+                                        <h3 className="font-bold text-amber-900 mb-3 flex items-center gap-2">
+                                            <span>💎 VALUABLE ACQUISITIONS</span>
+                                            <span className="text-xs bg-amber-200 px-2 py-1 rounded">{dramaticHighlights.valuable.length}</span>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {dramaticHighlights.valuable.map((h, idx) => (
+                                                <div key={idx} className="bg-white rounded p-3 border border-amber-200">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="font-semibold text-gray-800">{h.description}</div>
+                                                        {h.value === 'political_power' && (
+                                                            <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded font-bold">+VOTES</span>
+                                                        )}
+                                                        {h.value === 'political_leverage' && (
+                                                            <span className="text-xs bg-indigo-600 text-white px-2 py-1 rounded font-bold">LEVERAGE</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Location: {h.region} ({h.scenario}) • Character: {h.character}
+                                                    </div>
+                                                    {h.notes && (
+                                                        <div className="text-xs text-amber-700 mt-1 italic">
+                                                            ℹ️ {h.notes}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Scoring: {h.scoring.marks} marks, {h.scoring.fama > 0 ? '+' : ''}{h.scoring.fama} fama, {h.scoring.nefas > 0 ? '+' : ''}{h.scoring.nefas} nefas
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Heroic Actions */}
+                                {dramaticHighlights.heroic.length > 0 && (
+                                    <div className="bg-blue-50 rounded-lg p-4 mb-4 border-l-4 border-blue-600">
+                                        <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                                            <span>🛡️ HEROIC ACTIONS</span>
+                                            <span className="text-xs bg-blue-200 px-2 py-1 rounded">{dramaticHighlights.heroic.length}</span>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {dramaticHighlights.heroic.map((h, idx) => (
+                                                <div key={idx} className="bg-white rounded p-3 border border-blue-200">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="font-semibold text-gray-800">{h.description}</div>
+                                                        <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded font-bold uppercase">
+                                                            {h.virtue}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        Location: {h.region} ({h.scenario}) • Character: {h.character}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Scoring: {h.scoring.marks} marks, {h.scoring.fama > 0 ? '+' : ''}{h.scoring.fama} fama, {h.scoring.nefas > 0 ? '+' : ''}{h.scoring.nefas} nefas
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* If no dramatic events */}
+                                {dramaticHighlights.scandalous.length === 0 && 
+                                 dramaticHighlights.brutal.length === 0 && 
+                                 dramaticHighlights.sacrilegious.length === 0 &&
+                                 dramaticHighlights.valuable.length === 0 &&
+                                 dramaticHighlights.heroic.length === 0 && (
+                                    <div className="bg-gray-50 rounded-lg p-6 text-center border border-gray-300">
+                                        <p className="text-gray-600">
+                                            No particularly dramatic Q3 scenarios detected in this class. 
+                                            Students chose more routine options for their unique scenarios.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="mt-4 bg-rose-100 rounded-lg p-4 border border-rose-300">
+                                    <h4 className="font-bold text-gray-800 mb-2">🎭 Narration Tips</h4>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• In smaller classes, narrate all dramatic scenarios</li>
+                                        <li>• In larger classes, pick 3-5 most dramatic to spotlight</li>
+                                        <li>• Consider revealing faction but not specific student name</li>
+                                        <li>• Build suspense: "A certain Venetian merchant was seen..."</li>
+                                        <li>• Valuable acquisitions will affect future game decisions</li>
+                                        <li>• Items marked "+VOTES" give extra power in committees</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Silver Management & Venice Payment */}
+                        {silverAnalysis && (
+                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg shadow-md p-6 mb-6 border-2 border-emerald-400">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">💰 Silver Management & Venice Payment</h2>
+                                
+                                <div className="bg-white rounded-lg p-4 mb-4 border border-emerald-200">
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        {silverAnalysis.studentsReporting} student{silverAnalysis.studentsReporting !== 1 ? 's' : ''} reported silver from the sack.
+                                        Per the March Pact, all plunder must be turned in for Venice repayment and distribution.
+                                    </p>
+                                </div>
+
+                                {/* Venice Payment Status */}
+                                <div className={`rounded-lg p-6 mb-4 border-2 ${silverAnalysis.venicePaid ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+                                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                        {silverAnalysis.venicePaid ? (
+                                            <>
+                                                <span className="text-green-700">✅ VENICE DEBT PAID IN FULL</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-red-700">⚠️ VENICE PAYMENT SHORTFALL</span>
+                                            </>
+                                        )}
+                                    </h3>
+                                    
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div className={`${silverAnalysis.venicePaid ? 'bg-white' : 'bg-red-100'} rounded-lg p-4 text-center border ${silverAnalysis.venicePaid ? 'border-green-300' : 'border-red-300'}`}>
+                                            <div className="text-sm text-gray-600 mb-1">Required</div>
+                                            <div className="text-2xl font-bold text-gray-800">{silverAnalysis.veniceRequired}</div>
+                                            <div className="text-xs text-gray-500">{silverAnalysis.studentsReporting} × 100 marks</div>
+                                        </div>
+                                        <div className={`${silverAnalysis.venicePaid ? 'bg-white' : 'bg-red-100'} rounded-lg p-4 text-center border ${silverAnalysis.venicePaid ? 'border-green-300' : 'border-red-300'}`}>
+                                            <div className="text-sm text-gray-600 mb-1">Collected</div>
+                                            <div className="text-2xl font-bold text-emerald-600">{silverAnalysis.totalTurnedIn}</div>
+                                            <div className="text-xs text-gray-500">Turned into treasury</div>
+                                        </div>
+                                        <div className={`${silverAnalysis.venicePaid ? 'bg-white' : 'bg-red-100'} rounded-lg p-4 text-center border ${silverAnalysis.venicePaid ? 'border-green-300' : 'border-red-300'}`}>
+                                            <div className="text-sm text-gray-600 mb-1">
+                                                {silverAnalysis.venicePaid ? 'Surplus' : 'Shortfall'}
+                                            </div>
+                                            <div className={`text-2xl font-bold ${silverAnalysis.venicePaid ? 'text-green-600' : 'text-red-600'}`}>
+                                                {silverAnalysis.venicePaid ? 
+                                                    `+${silverAnalysis.totalTurnedIn - silverAnalysis.veniceRequired}` : 
+                                                    `-${silverAnalysis.veniceShortfall}`
+                                                }
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                {silverAnalysis.venicePaid ? 'For distribution' : 'Cannot pay Venice'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {!silverAnalysis.venicePaid && (
+                                        <div className="bg-red-900/10 border border-red-400 rounded-lg p-4">
+                                            <h4 className="font-bold text-red-800 mb-2">⚖️ Consequences & Options</h4>
+                                            <p className="text-sm text-red-700 mb-3">
+                                                Venice cannot be paid in full. This will cause conflict and require negotiation.
+                                            </p>
+                                            <div className="text-sm text-gray-700 space-y-2">
+                                                <div><strong>Option 1:</strong> Defer payment with Jerusalem promises (Venice likely to refuse)</div>
+                                                <div><strong>Option 2:</strong> Compensate with relics (requires emperor's approval)</div>
+                                                <div><strong>Option 3:</strong> Grant Venice additional land beyond March Pact</div>
+                                                <div><strong>Option 4:</strong> Offer amnesty for those who kept silver to turn it in now</div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Class Silver Overview */}
+                                <div className="bg-white rounded-lg p-6 mb-4 border border-emerald-300">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4">Class Silver Overview</h3>
+                                    <div className="grid grid-cols-4 gap-4">
+                                        <div className="bg-yellow-50 rounded-lg p-4 text-center border-l-4 border-yellow-500">
+                                            <div className="text-3xl font-bold text-yellow-700">{silverAnalysis.totalCollected}</div>
+                                            <div className="text-xs text-gray-600 mt-1">Total Collected</div>
+                                        </div>
+                                        <div className="bg-green-50 rounded-lg p-4 text-center border-l-4 border-green-500">
+                                            <div className="text-3xl font-bold text-green-700">{silverAnalysis.totalTurnedIn}</div>
+                                            <div className="text-xs text-gray-600 mt-1">Turned In</div>
+                                        </div>
+                                        <div className="bg-purple-50 rounded-lg p-4 text-center border-l-4 border-purple-500">
+                                            <div className="text-3xl font-bold text-purple-700">{silverAnalysis.totalKept}</div>
+                                            <div className="text-xs text-gray-600 mt-1">Kept Private</div>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-lg p-4 text-center border-l-4 border-blue-500">
+                                            <div className="text-3xl font-bold text-blue-700">{silverAnalysis.avgPercentTurnedIn.toFixed(1)}%</div>
+                                            <div className="text-xs text-gray-600 mt-1">Avg % Turned In</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Honesty Distribution */}
+                                <div className="bg-white rounded-lg p-6 mb-4 border border-emerald-300">
+                                    <h3 className="text-lg font-bold text-gray-800 mb-4">Honesty Distribution</h3>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 text-sm font-semibold text-green-700">Full (95%+)</div>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                                <div 
+                                                    className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                    style={{width: `${(silverAnalysis.honestyCategories.full / silverAnalysis.studentsReporting) * 100}%`}}
+                                                >
+                                                    <span className="text-white text-xs font-bold">{silverAnalysis.honestyCategories.full}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 text-sm font-semibold text-blue-700">High (70-94%)</div>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                                <div 
+                                                    className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                    style={{width: `${(silverAnalysis.honestyCategories.high / silverAnalysis.studentsReporting) * 100}%`}}
+                                                >
+                                                    <span className="text-white text-xs font-bold">{silverAnalysis.honestyCategories.high}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 text-sm font-semibold text-yellow-700">Moderate (40-69%)</div>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                                <div 
+                                                    className="bg-yellow-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                    style={{width: `${(silverAnalysis.honestyCategories.moderate / silverAnalysis.studentsReporting) * 100}%`}}
+                                                >
+                                                    <span className="text-white text-xs font-bold">{silverAnalysis.honestyCategories.moderate}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 text-sm font-semibold text-orange-700">Low (15-39%)</div>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                                <div 
+                                                    className="bg-orange-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                    style={{width: `${(silverAnalysis.honestyCategories.low / silverAnalysis.studentsReporting) * 100}%`}}
+                                                >
+                                                    <span className="text-white text-xs font-bold">{silverAnalysis.honestyCategories.low}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 text-sm font-semibold text-red-700">Minimal (&lt;15%)</div>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-6">
+                                                <div 
+                                                    className="bg-red-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                    style={{width: `${(silverAnalysis.honestyCategories.minimal / silverAnalysis.studentsReporting) * 100}%`}}
+                                                >
+                                                    <span className="text-white text-xs font-bold">{silverAnalysis.honestyCategories.minimal}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Most Honest & Most Greedy */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="bg-green-50 rounded-lg p-4 border border-green-300">
+                                        <h4 className="font-bold text-green-800 mb-3">🏆 Most Honest</h4>
+                                        <div className="space-y-2">
+                                            {silverAnalysis.mostHonest.map((r, idx) => (
+                                                <div key={idx} className="text-sm bg-white rounded p-2 border border-green-200">
+                                                    <div className="font-semibold text-gray-800">{r.character.name}</div>
+                                                    <div className="text-xs text-gray-600">
+                                                        {r.silver.turnedIn} of {r.silver.collected} ({r.silver.percentTurnedIn.toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="bg-red-50 rounded-lg p-4 border border-red-300">
+                                        <h4 className="font-bold text-red-800 mb-3">💰 Most Greedy</h4>
+                                        <div className="space-y-2">
+                                            {silverAnalysis.mostGreedy.map((r, idx) => (
+                                                <div key={idx} className="text-sm bg-white rounded p-2 border border-red-200">
+                                                    <div className="font-semibold text-gray-800">{r.character.name}</div>
+                                                    <div className="text-xs text-gray-600">
+                                                        {r.silver.turnedIn} of {r.silver.collected} ({r.silver.percentTurnedIn.toFixed(1)}%)
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-emerald-100 rounded-lg p-4 border border-emerald-400">
+                                    <h4 className="font-bold text-gray-800 mb-2">📖 Discussion Prompts</h4>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• "Only {silverAnalysis.avgPercentTurnedIn.toFixed(0)}% of collected silver was reported. What does this say about collective vs. individual interests?"</li>
+                                        {!silverAnalysis.venicePaid && (
+                                            <li>• "Venice cannot be paid. Who bears responsibility - those who kept silver, or the system itself?"</li>
+                                        )}
+                                        <li>• "Compare the honesty distribution to your expectations. What incentives influenced decisions?"</li>
+                                        <li>• "Should there be consequences for those who kept >75% of their silver? What would be fair?"</li>
+                                        <li>• "If amnesty were offered, would it change the moral calculation?"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Class Summary */}
+                        {classStats && (
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg shadow-md p-6 mb-6 border-2 border-green-300">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h2 className="text-2xl font-bold text-gray-800">📊 Class Summary</h2>
+                                    <button
+                                        onClick={exportToCSV}
+                                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow"
+                                    >
+                                        📥 Export CSV
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-4 gap-4 mb-4">
+                                    <div className="bg-white rounded-lg p-4 shadow">
+                                        <div className="text-3xl font-bold text-blue-600">{classStats.count}</div>
+                                        <div className="text-sm text-gray-600">Students</div>
+                                    </div>
+                                    <div className="bg-white rounded-lg p-4 shadow">
+                                        <div className="text-3xl font-bold text-yellow-600">{classStats.totals.marks}</div>
+                                        <div className="text-sm text-gray-600">Total Marks</div>
+                                        <div className="text-xs text-gray-500">Avg: {classStats.avg.marks}</div>
+                                    </div>
+                                    <div className="bg-white rounded-lg p-4 shadow">
+                                        <div className="text-3xl font-bold text-blue-600">
+                                            {classStats.totals.fama > 0 ? '+' : ''}{classStats.totals.fama}
+                                        </div>
+                                        <div className="text-sm text-gray-600">Total Fama</div>
+                                        <div className="text-xs text-gray-500">Avg: {classStats.avg.fama}</div>
+                                    </div>
+                                    <div className="bg-white rounded-lg p-4 shadow">
+                                        <div className="text-3xl font-bold text-red-600">
+                                            {classStats.totals.nefas > 0 ? '+' : ''}{classStats.totals.nefas}
+                                        </div>
+                                        <div className="text-sm text-gray-600">Total Nefas</div>
+                                        <div className="text-xs text-gray-500">Avg: {classStats.avg.nefas}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Individual Results */}
+                        {results && results.length > 0 && (
+                            <div className="space-y-4">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-4">Individual Results</h2>
+                                {results.map((result, idx) => (
+                                    <div key={idx} className="bg-white rounded-lg shadow-md p-6">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-gray-800">
+                                                    {result.character.name}
+                                                </h3>
+                                                <p className="text-sm text-gray-600">
+                                                    Code: <code className="bg-gray-100 px-2 py-1 rounded">{result.code}</code>
+                                                    {' • '}
+                                                    Scenario: {result.scenario.code} ({result.scenario.region}, Position {result.scenario.position})
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-yellow-600">{result.totals.marks}</div>
+                                                    <div className="text-xs text-gray-600">Marks</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-blue-600">
+                                                        {result.totals.fama > 0 ? '+' : ''}{result.totals.fama}
+                                                    </div>
+                                                    <div className="text-xs text-gray-600">Fama</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-red-600">
+                                                        {result.totals.nefas > 0 ? '+' : ''}{result.totals.nefas}
+                                                    </div>
+                                                    <div className="text-xs text-gray-600">Nefas</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="border-t pt-4">
+                                            <h4 className="font-bold text-gray-700 mb-2">Choices Made:</h4>
+                                            <div className="space-y-2">
+                                                {result.choiceDetails.map((detail, qIdx) => {
+                                                    // Get quality label for Q1 and Q2
+                                                    let qualityLabel = null;
+                                                    let qualityColor = '';
+                                                    if (detail.question === 1) {
+                                                        qualityLabel = QUALITY_MAP.Q1[detail.choice];
+                                                        qualityColor = qualityLabel === 'Violence' ? 'bg-red-100 text-red-700' :
+                                                                      qualityLabel === 'Piety' ? 'bg-blue-100 text-blue-700' :
+                                                                      qualityLabel === 'Plunder' ? 'bg-green-100 text-green-700' :
+                                                                      'bg-purple-100 text-purple-700';
+                                                    } else if (detail.question === 2) {
+                                                        qualityLabel = QUALITY_MAP.Q2[detail.choice];
+                                                        qualityColor = qualityLabel === 'Violence' ? 'bg-red-100 text-red-700' :
+                                                                      qualityLabel === 'Piety' ? 'bg-blue-100 text-blue-700' :
+                                                                      qualityLabel === 'Plunder' ? 'bg-green-100 text-green-700' :
+                                                                      'bg-purple-100 text-purple-700';
+                                                    }
+                                                    
+                                                    return (
+                                                        <div key={qIdx} className="text-sm bg-gray-50 p-3 rounded">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className="font-bold text-gray-800">Q{detail.question}: Choice {detail.choice}</span>
+                                                                {qualityLabel && (
+                                                                    <span className={`text-xs px-2 py-0.5 rounded font-semibold ${qualityColor}`}>
+                                                                        {qualityLabel}
+                                                                    </span>
+                                                                )}
+                                                                {detail.question === 3 && (
+                                                                    <span className="text-xs px-2 py-0.5 rounded font-semibold bg-amber-100 text-amber-700">
+                                                                        Unique Scenario
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <span className="text-gray-700">{detail.text}</span>
+                                                            <div className="text-xs text-gray-600 mt-1">
+                                                                +{detail.marks} marks, {detail.fama > 0 ? '+' : ''}{detail.fama} fama, {detail.nefas > 0 ? '+' : ''}{detail.nefas} nefas
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Silver Data (if available) */}
+                                        {result.silver.hasData && (
+                                            <div className="border-t pt-4 mt-4">
+                                                <h4 className="font-bold text-gray-700 mb-3">💰 Silver Reporting:</h4>
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    <div className="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-300">
+                                                        <div className="text-xl font-bold text-yellow-700">{result.silver.collected}</div>
+                                                        <div className="text-xs text-gray-600">Collected</div>
+                                                    </div>
+                                                    <div className="bg-green-50 rounded-lg p-3 text-center border border-green-300">
+                                                        <div className="text-xl font-bold text-green-700">{result.silver.turnedIn}</div>
+                                                        <div className="text-xs text-gray-600">Turned In</div>
+                                                    </div>
+                                                    <div className="bg-purple-50 rounded-lg p-3 text-center border border-purple-300">
+                                                        <div className="text-xl font-bold text-purple-700">{result.silver.kept}</div>
+                                                        <div className="text-xs text-gray-600">Kept</div>
+                                                    </div>
+                                                    <div className={`rounded-lg p-3 text-center border ${
+                                                        result.silver.percentTurnedIn >= 95 ? 'bg-green-50 border-green-300' :
+                                                        result.silver.percentTurnedIn >= 70 ? 'bg-blue-50 border-blue-300' :
+                                                        result.silver.percentTurnedIn >= 40 ? 'bg-yellow-50 border-yellow-300' :
+                                                        result.silver.percentTurnedIn >= 15 ? 'bg-orange-50 border-orange-300' :
+                                                        'bg-red-50 border-red-300'
+                                                    }`}>
+                                                        <div className={`text-xl font-bold ${
+                                                            result.silver.percentTurnedIn >= 95 ? 'text-green-700' :
+                                                            result.silver.percentTurnedIn >= 70 ? 'text-blue-700' :
+                                                            result.silver.percentTurnedIn >= 40 ? 'text-yellow-700' :
+                                                            result.silver.percentTurnedIn >= 15 ? 'text-orange-700' :
+                                                            'text-red-700'
+                                                        }`}>
+                                                            {result.silver.percentTurnedIn.toFixed(0)}%
+                                                        </div>
+                                                        <div className="text-xs text-gray-600">% Turned In</div>
+                                                    </div>
+                                                </div>
+                                                {result.silver.percentTurnedIn < 15 && (
+                                                    <div className="mt-2 p-2 bg-red-50 border border-red-300 rounded text-xs text-red-700">
+                                                        ⚠️ Kept {result.silver.kept} marks ({(100 - result.silver.percentTurnedIn).toFixed(0)}% of total)
+                                                    </div>
+                                                )}
+                                                {result.silver.percentTurnedIn >= 95 && (
+                                                    <div className="mt-2 p-2 bg-green-50 border border-green-300 rounded text-xs text-green-700">
+                                                        ✅ Honest reporting - turned in nearly everything
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="mt-8 text-center text-gray-600 text-sm">
+                            <p>Fourth Crusade: Sack of Constantinople - Instructor Decoder Tool</p>
+                            <p className="text-xs mt-1">All 30 scenarios complete: Petrion (P1-P6), Blachernae (B1-B6), Great Palace (G1-G6), Merchant Quarter (M1-M6), Residential Quarter (R1-R6)</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<DecoderTool />, document.getElementById('root'));
+    </script>
+</body>
+</html>
